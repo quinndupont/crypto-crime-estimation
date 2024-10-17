@@ -12,7 +12,8 @@ fetch('results.csv')
     .then(csvText => {
         crimeData = Papa.parse(csvText, {
             header: true,
-            dynamicTyping: true
+            dynamicTyping: true,
+            skipEmptyLines: true
         }).data;
 
         // After crime data is loaded, fetch the volume data
@@ -21,7 +22,8 @@ fetch('results.csv')
             .then(csvText => {
                 totalVolumeData = Papa.parse(csvText, {
                     header: true,
-                    dynamicTyping: true
+                    dynamicTyping: true,
+                    skipEmptyLines: true
                 }).data;
 
                 // Now that both datasets are loaded, proceed to create table and plot
@@ -41,7 +43,9 @@ function createTable() {
     let tableHTML = '<table><tr><th>Include</th><th>Category</th><th>Adjustment Factor</th></tr>';
 
     crimeData.forEach((row) => {
-        crimeTypes.add(row.type);
+        if (row && row.type) {
+            crimeTypes.add(row.type);
+        }
     });
 
     crimeTypes.forEach((type) => {
@@ -86,39 +90,60 @@ function createTable() {
 function calculateAndPlot() {
     // First, parse the date strings into Date objects
     totalVolumeData.forEach(row => {
-        row.DateTime = new Date(row.DateTime);
+        if (row && row.DateTime) {
+            row.DateTime = new Date(row.DateTime);
+        }
     });
 
     // Sort the totalVolumeData by date
     totalVolumeData.sort((a, b) => a.DateTime - b.DateTime);
 
-    let dates = totalVolumeData.map(row => row.DateTime);
-    let totalVolumes = totalVolumeData.map(row => row['Volume (24h)']);
-
     // Prepare crime data per year
     let crimeDataByYear = {};
 
     crimeData.forEach(row => {
-        let year = row.year.toString();
-        let type = row.type;
-        let volume = parseFloat(row.volume.toString().replace(/[\$,]/g, '')); // Remove $ and commas
+        if (row && row.year != null && row.volume != null) {
+            let year = row.year.toString();
+            let type = row.type;
+            let volume = parseFloat(row.volume.toString().replace(/[\$,]/g, '')); // Remove $ and commas
 
-        if (!crimeDataByYear[year]) {
-            crimeDataByYear[year] = {};
+            if (!crimeDataByYear[year]) {
+                crimeDataByYear[year] = {};
+            }
+
+            crimeDataByYear[year][type] = volume;
+        } else {
+            console.warn('Invalid row in crimeData:', row);
         }
+    });
 
-        crimeDataByYear[year][type] = volume;
+    // Calculate total transaction volume per year
+    let totalVolumeByYear = {};
+    totalVolumeData.forEach(row => {
+        let date = row.DateTime;
+        let volume = row['Volume (24h)'];
+        let year = date.getFullYear().toString();
+
+        if (!totalVolumeByYear[year]) {
+            totalVolumeByYear[year] = 0;
+        }
+        totalVolumeByYear[year] += volume;
     });
 
     // Apply discount and increase factors
     adjustedCrimeData = [];
 
-    dates.forEach((date, index) => {
-        let totalVolume = totalVolumes[index];
+    totalVolumeData.forEach((row) => {
+        let date = row.DateTime;
+        let totalVolume = row['Volume (24h)'];
         let year = date.getFullYear().toString();
 
         let crimeVolumes = crimeDataByYear[year] || {};
         let adjustedVolume = 0;
+
+        // Calculate proportion of day's volume to year's total volume
+        let totalVolumeYear = totalVolumeByYear[year] || 1; // Avoid division by zero
+        let volumeProportion = totalVolume / totalVolumeYear;
 
         crimeTypes.forEach(type => {
             const includeCheckbox = document.querySelector(`input[type="checkbox"][data-type="${type}"]`);
@@ -127,16 +152,16 @@ function calculateAndPlot() {
             let adjustmentInput = document.querySelector(`input[type="number"][data-type="${type}"]`);
             let adjustmentFactor = adjustmentInput ? parseFloat(adjustmentInput.value) : 1;
 
-            let volume = crimeVolumes[type] || 0;
+            let categoryYearlyVolume = crimeVolumes[type] || 0;
 
             // Apply increase factor to estimated categories
-            volume = volume * (1 + increaseFactor / 100);
+            let adjustedCategoryVolume = categoryYearlyVolume * adjustmentFactor * (1 + increaseFactor / 100);
 
-            // Apply adjustment factor per category
-            volume = volume * adjustmentFactor;
+            // Distribute the yearly category volume to the day based on volume proportion
+            let dailyCategoryVolume = adjustedCategoryVolume * volumeProportion;
 
             if (include) {
-                adjustedVolume += volume;
+                adjustedVolume += dailyCategoryVolume;
             }
         });
 
@@ -159,20 +184,28 @@ function calculateAndPlot() {
 }
 
 function plotData(dates, totalVolumes, illicitVolumes) {
+    // Convert volumes to millions for plotting
+    const totalVolumesInMillions = totalVolumes.map(value => value / 1e6);
+    const illicitVolumesInMillions = illicitVolumes.map(value => value / 1e6);
+
     const trace1 = {
         x: dates,
-        y: totalVolumes,
+        y: totalVolumesInMillions,
         mode: 'lines',
-        name: 'Total Transaction Volume (Discounted)',
-        line: { color: 'blue' }
+        name: 'Total Transaction Volume',
+        line: { color: 'blue' },
+        yaxis: 'y1',
+        hovertemplate: 'Date: %{x|%b %d, %Y}<br>Total Volume: %{y:.2f}M USD<extra></extra>'
     };
 
     const trace2 = {
         x: dates,
-        y: illicitVolumes,
+        y: illicitVolumesInMillions,
         mode: 'lines',
         name: 'Adjusted Illicit Volume',
-        line: { color: 'orange' }
+        line: { color: 'orange' },
+        yaxis: 'y1',
+        hovertemplate: 'Date: %{x|%b %d, %Y}<br>Illicit Volume: %{y:.2f}M USD<extra></extra>'
     };
 
     const data = [trace1, trace2];
@@ -182,17 +215,29 @@ function plotData(dates, totalVolumes, illicitVolumes) {
         xaxis: {
             title: 'Date',
             type: 'date',
-            tickformat: '%Y-%m-%d',
-            tick0: dates[0],
-            dtick: 'M12' // Tick every 12 months
+            tickformat: '%b %Y',
+            tickangle: -45,
+            tickmode: 'auto',
+            nticks: 20,
+            automargin: true
         },
         yaxis: {
-            title: 'Volume ($)',
-            tickformat: ',.0f'
+            title: 'Volume ($ Millions)',
+            type: 'log',
+            autorange: true,
+            tickformat: ',.0f',
+            ticksuffix: 'M',
+            automargin: true
         },
         legend: {
             x: 0,
             y: 1
+        },
+        margin: {
+            t: 50,
+            l: 70,
+            r: 50,
+            b: 100
         }
     };
 

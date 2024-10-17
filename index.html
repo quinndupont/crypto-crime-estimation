@@ -45,26 +45,40 @@
 
 <div class="description">
     <p>
-        The estimation model is based on the following mathematical formula:
+        The estimation model is based on the following mathematical formulas:
     </p>
     <p>
-        $$ V_{\text{estimated_illicit}} = \sum_{i=1}^{N} C_i \times B_i \times \left(1 + \frac{I}{100}\right) $$
+        <b>Estimated Illicit Volume per Day:</b>
+    </p>
+    <p>
+        $$ V_{\text{illicit}}(d) = \sum_{i=1}^{N} C_i(y) \times B_i \times \left(1 + \frac{I}{100}\right) \times \frac{V_{\text{total}}(d)}{V_{\text{total}}(y)} $$
     </p>
     <p>
         Where:
         <ul>
-            <li>\( V_{\text{estimated_illicit}} \): Estimated illicit volume</li>
-            <li>\( C_i \): Known volume for category \( i \)</li>
+            <li>\( V_{\text{illicit}}(d) \): Estimated illicit volume on day \( d \)</li>
+            <li>\( C_i(y) \): Known illicit volume for category \( i \) in year \( y \)</li>
             <li>\( B_i \): Adjustment factor for category \( i \)</li>
             <li>\( I \): Increase percentage for estimated categories</li>
+            <li>\( V_{\text{total}}(d) \): Total transaction volume on day \( d \)</li>
+            <li>\( V_{\text{total}}(y) \): Total transaction volume in year \( y \)</li>
         </ul>
     </p>
     <p>
-        The total transaction volume is adjusted by the discount factor \( D \) as follows:
+        <b>Adjusted Total Transaction Volume per Day:</b>
     </p>
     <p>
-        $$ V_{\text{total_adjusted}} = V_{\text{total}} \times \left(1 - \frac{D}{100}\right) $$
+        $$ V_{\text{total_adjusted}}(d) = V_{\text{total}}(d) \times \left(1 - \frac{D}{100}\right) $$
     </p>
+    <p>
+        Where:
+        <ul>
+            <li>\( V_{\text{total_adjusted}}(d) \): Adjusted total transaction volume on day \( d \)</li>
+            <li>\( V_{\text{total}}(d) \): Original total transaction volume on day \( d \)</li>
+            <li>\( D \): Discount percentage applied to base rates</li>
+        </ul>
+    </p>
+    
 
     <p>
         The discount factor adjusts the overall estimate of volume.
