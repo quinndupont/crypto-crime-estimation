@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cryptocurrency Payment for Crime Estimation</title>
+    <meta charset="UTF-8">
+    <!-- Include Plotly.js, PapaParse, and MathJax from CDN -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <!-- MathJax for rendering mathematical equations -->
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Cryptocurrency Payment for Crime Estimation</h1>
+
+<div class="description">
+    <p>
+        This tool estimates the proportion of cryptocurrency transactions used for illicit activities by analyzing known crime data and adjusting base rates. Use the controls below to adjust the variables and see how they impact the estimated illicit volume over time.
+    </p>
+</div>
+
+<div class="controls-container">
+    <div class="control-group">
+        <label for="increaseSlider">Increase Category Base Rates (%): </label>
+        <input type="range" id="increaseSlider" value="0" min="0" max="100" step="1">
+        <span id="increaseValue">0%</span>
+    </div>
+
+    <div class="control-group">
+        <label for="discountInput">Discount Investment Volume (%): </label>
+        <input type="number" id="discountInput" value="0" min="0" max="100" step="1">
+        <button id="discountButton">Apply Discount</button>
+    </div>
+</div>
+
+<div id="tableContainer"></div>
+
+<div class="chart-container">
+    <div id="chart"></div>
+</div>
+
+<div class="description">
+    <p>
+        The estimation model is based on the following mathematical formula:
+    </p>
+    <p>
+        $$ V_{\text{estimated_illicit}} = \sum_{i=1}^{N} C_i \times B_i \times \left(1 + \frac{I}{100}\right) $$
+    </p>
+    <p>
+        Where:
+        <ul>
+            <li>\( V_{\text{estimated_illicit}} \): Estimated illicit volume</li>
+            <li>\( C_i \): Known volume for category \( i \)</li>
+            <li>\( B_i \): Adjustment factor for category \( i \)</li>
+            <li>\( I \): Increase percentage for estimated categories</li>
+        </ul>
+    </p>
+    <p>
+        The total transaction volume is adjusted by the discount factor \( D \) as follows:
+    </p>
+    <p>
+        $$ V_{\text{total_adjusted}} = V_{\text{total}} \times \left(1 - \frac{D}{100}\right) $$
+    </p>
+
+    <p>
+        The discount factor adjusts the overall estimate of volume.
+    </p>
+</div>
+
+<div class="dataset-explanation">
+    <h2>About the Dataset</h2>
+    <p>
+        The total transaction volume data is sourced from <a href="https://coinmarketcap.com/">Coinmarketcap</a>, which tracks transactions for all known tokens (24h volume). Crime data used in this tool is sourced from <a href="https://www.chainalysis.com/blog/2024-crypto-crime-report-introduction/">Chainalysis</a> estimates. In 2023, approximately <strong>$24.2 billion</strong> was received by illicit addresses, representing about <strong>0.34%</strong> of the total on-chain transaction volume. However, this estimate represents a fraction of real criminal activity, so the tool provides options to increase the base rates or individual category rates.
+    </p>
+    <p>
+        The estimates of illicit transaction activity <strong>include</strong>:
+    </p>
+    <ul>
+        <li>Funds sent to addresses identified as illicit.</li>
+        <li>Funds stolen in cryptocurrency hacks.</li>
+    </ul>
+    <p>
+        The estimates <strong>do not include</strong>:
+    </p>
+    <ul>
+        <li>Funds sent to addresses not yet identified as illicit.</li>
+        <li>Funds derived from non-crypto-native crimes, unless specifically reported.</li>
+        <li>Funds associated with crypto platforms accused of fraud without legal convictions.</li>
+        <li>Transaction volume potentially linked to market manipulation.</li>
+        <li>Funds involved in cryptocurrency money laundering (to avoid double-counting).</li>
+    </ul>
+    <p>
+        It's important to note that the absence of certain data points is due to limitations in identification and to prevent overestimation of illicit activities.
+    </p>
+</div>
+
+
+
+<script src="script.js"></script>
+</body>
+</html>

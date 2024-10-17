@@ -1,0 +1,8 @@
+Category,Known_Volume,Base_Rate_Adjustment,Discount_Factor
+Scamming,5000000000,1.1,0.05
+Stolen Funds,3000000000,1.2,0.10
+Ransomware,1000000000,1.5,0.02
+Darknet Markets,2000000000,1.3,0.05
+Sanctioned Entities,10000000000,1.0,0.15
+Terrorism Financing,200000000,2.0,0.01
+Money Laundering,3000000000,1.4,0.20

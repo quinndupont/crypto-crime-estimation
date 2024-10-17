@@ -1,0 +1,137 @@
+/* style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f9f9f9;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.dataset-explanation {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.dataset-explanation h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.dataset-explanation p {
+    margin-bottom: 15px;
+}
+
+.dataset-explanation ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.dataset-explanation li {
+    margin-bottom: 10px;
+}
+
+.dataset-explanation strong {
+    color: #000;
+}
+
+.description {
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    text-align: justify;
+    color: #555;
+    line-height: 1.6;
+}
+
+.description p {
+    margin-bottom: 15px;
+}
+
+.controls-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.control-group {
+    margin: 10px 20px;
+}
+
+.control-group label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.control-group input[type="number"],
+.control-group input[type="range"] {
+    margin-right: 10px;
+}
+
+#increaseValue {
+    font-weight: bold;
+}
+
+#tableContainer {
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+th, td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+input[type="number"] {
+    width: 80px;
+    box-sizing: border-box;
+}
+
+input[type="checkbox"] {
+    transform: scale(1.2);
+}
+
+.chart-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    height: 500px;
+}
+
+#chart {
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .controls-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .control-group {
+        margin: 10px 0;
+    }
+}
